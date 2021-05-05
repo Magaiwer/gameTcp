@@ -64,8 +64,8 @@ public class Player implements Runnable {
 			direction = DOWN;
 		}
 		if (keyCode == KeyEvent.VK_SPACE){
-			//bullets.add(new Bullet(this.game, x + 13, y + 13, direction));
-			bullet = new Bullet(this.game, x + 13, y + 13, direction);
+			bullets.add(new Bullet(this.game, x + 13, y + 13, direction));
+			//bullet = new Bullet(this.game, x + 13, y + 13, direction);
 		}
 	}
 

@@ -2,11 +2,15 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.image.ImageObserver;
 import java.io.IOException;
 import java.util.Map;
 
 public class Game extends JPanel {
     private static final String PASSWORD_HARDCODE = "freeForAll";
+    private static final int WIDTH = 800;
+    private static final int HEIGHT = 800;
+
     Map<String, Player> playersMap;
     Player player = new Player(this);
 
@@ -36,9 +40,14 @@ public class Game extends JPanel {
     }
 
     private void paintScore(Graphics2D g2d) {
-        g2d.setColor(Color.GRAY);
-        g2d.setFont(new Font("Verdana", Font.BOLD, 30));
-        g2d.drawString(String.valueOf(getScore()), 10, 30);
+        g2d.setColor(Color.GREEN);
+        g2d.setFont(new Font("Verdana", Font.BOLD, 12));
+        g2d.drawString("Players connected", 10, 20);
+
+        g2d.setColor(Color.YELLOW);
+        g2d.setFont(new Font("Verdana", Font.BOLD, 10));
+        g2d.drawString("192.168.0.1", 10, 40);
+        g2d.drawString("192.168.0.2", 10, 60);
     }
 
     @Override
@@ -55,16 +64,16 @@ public class Game extends JPanel {
     }
 
     public void intiFire(Graphics2D g, Player player) {
-        if (player.getBullet() != null) {
+/*        if (player.getBullet() != null) {
             player.getBullet().paint(g);
             player.getBullet().move();
             //new Thread(player.getBullet()).start();
-        }
-/*        player.getBullets().forEach(bullet -> {
+        }*/
+        player.getBullets().forEach(bullet -> {
             bullet.paint(g);
             bullet.move();
             // new Thread(bullet).start();
-        });*/
+        });
     }
 
     public void createPlayer(Player player) {
@@ -80,7 +89,9 @@ public class Game extends JPanel {
         JFrame frame = new JFrame("Free For All");
         Game game = new Game();
         frame.add(game);
-        frame.setSize(600, 600);
+        frame.setSize(WIDTH, HEIGHT);
+        frame.setResizable(false);
+        frame.setLocationRelativeTo(game);
         frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
