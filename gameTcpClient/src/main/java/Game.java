@@ -3,15 +3,18 @@ import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Game extends JPanel {
-    private static final String PASSWORD_HARDCODE = "freeForAll";
     private static final int WIDTH = 800;
     private static final int HEIGHT = 800;
+    private static final String ADDRESS = "127.0.0.1";
+    private static final int PORT = 12345;
     Player player = new Player(this);
     StateD stateD = new StateD();
-
-    int speed = 1;
+    ClientTCP client = new ClientTCP();
+    Map<String, Player> playersMap = new HashMap<>();
 
     public Game() {
         addKeyListener(new KeyAdapter() {
@@ -28,23 +31,26 @@ public class Game extends JPanel {
         setFocusable(true);
     }
 
-    private int getScore() {
-        return speed - 1;
-    }
-
-    private void move() {
-        new Thread(player).start();
-    }
-
     private void paintScore(Graphics2D g2d) {
+        int height = 40;
         g2d.setColor(Color.GREEN);
         g2d.setFont(new Font("Verdana", Font.BOLD, 12));
         g2d.drawString("Players connected", 10, 20);
 
         g2d.setColor(Color.YELLOW);
         g2d.setFont(new Font("Verdana", Font.BOLD, 10));
-        g2d.drawString("192.168.0.1", 10, 40);
-        g2d.drawString("192.168.0.2", 10, 60);
+
+        if (stateD != null) {
+            for (PlayerServer p : stateD.getPlayers()) {
+                g2d.drawString(p.getPlayer(), 10, height);
+                height += (height / 2);
+            }
+        }
+        g2d.setColor(Color.RED);
+        for (int i = 0; i < WIDTH; i++) {
+            g2d.drawString("-", i, 100);
+
+        }
     }
 
     @Override
@@ -58,16 +64,18 @@ public class Game extends JPanel {
 
         player.paint(g2d);
         intiFire(g2d, player);
-
         paintScore(g2d);
+        move();
+        //createPlayer();
+        qualqUercoisa();
+
+    }
+
+    public void move() {
+        new Thread(player).start();
     }
 
     public void intiFire(Graphics2D g, Player player) {
-/*        if (player.getBullet() != null) {
-            player.getBullet().paint(g);
-            player.getBullet().move();
-            //new Thread(player.getBullet()).start();
-        }*/
         player.getBullets().forEach(bullet -> {
             bullet.paint(g);
             bullet.move();
@@ -75,37 +83,47 @@ public class Game extends JPanel {
         });
     }
 
-    public void createPlayer(StateD stateD) {
-        this.stateD = stateD;
+    public void update() {
+        try {
+            client.connect(ADDRESS, PORT);
+            stateD = (StateD) client.send(this.stateD);
+            client.disconnect();
+            createPlayer();
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void qualqUercoisa() {
+        stateD.setCommands(StateD.Commands.UPDATE);
+        update();
+    }
+
+    public void createPlayer() {
         stateD.getPlayers().forEach(p -> {
-            player = new Player(this);
-            player.setPosX(p.getPosX());
-            player.setPosY(p.getPosY());
-            new Thread(player).start();
+
+            if (!playersMap.containsKey(p.getPlayer())) {
+
+                if (!p.getPlayer().equals(client.getIpAddress())) {
+                    player = new Player(this);
+                }
+                player.setPosX(p.getPosX());
+                player.setPosY(p.getPosY());
+                new Thread(player).start();
+
+                playersMap.put(p.getPlayer(), player);
+            }
         });
     }
 
     public void startGame() {
         this.stateD.setCommands(StateD.Commands.NEW_PLAYER);
-/*        PlayerServer playerServer = new PlayerServer();
-        playerServer.posX(player.getPosX());
-        playerServer.posY(player.getPosY());
-
-        this.stateD.getPlayers().add(playerServer);*/
-        //this.createPlayer(stateD);
+        update();
     }
 
     public void gameOver() {
         JOptionPane.showMessageDialog(this, "Game Over", "Game Over", JOptionPane.YES_NO_OPTION);
         System.exit(ABORT);
-    }
-
-    public StateD getStateD() {
-        return stateD;
-    }
-
-    public void setStateD(StateD stateD) {
-        this.stateD = stateD;
     }
 
     public static void main(String[] args) throws InterruptedException, IOException, ClassNotFoundException {
@@ -118,18 +136,9 @@ public class Game extends JPanel {
         frame.setVisible(true);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-        ClientTCP client = new ClientTCP();
-        client.connect("127.0.0.1", 12345);
-
         game.startGame();
-        StateD stateD = (StateD) client.send(game.getStateD());
-        game.createPlayer(stateD);
-        client.disconnect();
-        //System.out.println(client.sendMessage(PASSWORD_HARDCODE));
-
 
         while (true) {
-            game.move();
             game.repaint();
             Thread.sleep(10);
         }

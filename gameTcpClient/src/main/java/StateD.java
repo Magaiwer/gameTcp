@@ -26,6 +26,7 @@ public class StateD implements Serializable {
 
     public static enum Commands implements Serializable {
         NEW_PLAYER,
+        UPDATE,
         KILL_PLAYER,
         NEW_BOT,
     }

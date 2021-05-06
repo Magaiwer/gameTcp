@@ -26,9 +26,22 @@ public class StateD implements Serializable {
 
     public static enum Commands implements Serializable {
         NEW_PLAYER,
+        UPDATE,
         KILL_PLAYER,
         NEW_BOT,
     }
+
+    public void removePlayer(PlayerServer p) {
+        this.getPlayers().remove(p);
+    }
+
+    public void addPlayer(PlayerServer p){
+        if (this.players != null) {
+            this.players.add(p);
+        }
+    }
+
+
 
 
 }

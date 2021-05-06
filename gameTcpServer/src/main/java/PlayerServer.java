@@ -1,4 +1,5 @@
 import java.io.Serializable;
+import java.util.Objects;
 
 public class PlayerServer implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -52,5 +53,18 @@ public class PlayerServer implements Serializable {
     public PlayerServer bot(boolean bot) {
         this.bot = bot;
         return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PlayerServer)) return false;
+        PlayerServer that = (PlayerServer) o;
+        return id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }
