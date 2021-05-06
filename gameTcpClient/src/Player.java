@@ -1,10 +1,11 @@
 import java.awt.*;
 import java.awt.event.KeyEvent;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class Player implements Runnable {
+public class Player  implements Runnable {
 	private static final int SQUARE = 30;
 	private static final int LEFT = 1;
 	private static final int RIGHT = 2;
@@ -12,11 +13,16 @@ public class Player implements Runnable {
 	private static final int DOWN = 4;
 	private static final int STOP = 5;
 	private static final int SPEED = 3;
-	int x = 0;
-	int y = 0;
+	private int posX = 0;
+	private int posY = 0;
 	int vx = 0;
 	int vy = 0;
 	int direction = 2;
+
+	private String id;
+	private String password;
+	private boolean killed = false;
+	private boolean bot = false;
 
 
 	private final Color color;
@@ -26,22 +32,21 @@ public class Player implements Runnable {
 
 	public Player(Game game) {
 		this.game= game;
-
-		x = (int) (Math.random() * game.getWidth());
-		y = (int) (Math.random() * game.getHeight());
+		this.posX = (int) (Math.random() * game.getWidth());
+		this.posY = (int) (Math.random() * game.getHeight());
 		color = randomColour();
 		bullets = new ArrayList<>();
 	}
 
 	void move() {
-		if (x + vx > 0 && x + vx < game.getWidth() - SQUARE)
-			x = x + vx;
-		if (y + vy > 0 && y + vy < game.getHeight() - SQUARE)
-			y = y + vy;
+		if (posX + vx > 0 && posX + vx < game.getWidth() - SQUARE)
+			posX = posX + vx;
+		if (posY + vy > 0 && posY + vy < game.getHeight() - SQUARE)
+			posY = posY + vy;
 	}
 
 	public void keyReleased(KeyEvent e) {
-		stop();
+		stopMove();
 	}
 
 	public void keyPressed(KeyEvent e) {
@@ -64,18 +69,18 @@ public class Player implements Runnable {
 			direction = DOWN;
 		}
 		if (keyCode == KeyEvent.VK_SPACE){
-			bullets.add(new Bullet(this.game, x + 13, y + 13, direction));
+			bullets.add(new Bullet(this.game, posX + 13, posY + 13, direction));
 			//bullet = new Bullet(this.game, x + 13, y + 13, direction);
 		}
 	}
 
 	public void paint(Graphics2D g) {
 		g.setColor(color);
-		g.fillRect(x, y, SQUARE, SQUARE);
+		g.fillRect(posX, posY, SQUARE, SQUARE);
 	}
 
 	public Rectangle getBounds() {
-		return new Rectangle(x, y, SQUARE, SQUARE);
+		return new Rectangle(posX, posY, SQUARE, SQUARE);
 	}
 
 	public List<Bullet> getBullets() {
@@ -86,9 +91,25 @@ public class Player implements Runnable {
 		return bullet;
 	}
 
-	private void stop() {
+	private void stopMove() {
 		vx = 0;
 		vy = 0;
+	}
+
+	public int getPosX() {
+		return posX;
+	}
+
+	public void setPosX(int posX) {
+		this.posX = posX;
+	}
+
+	public int getPosY() {
+		return posY;
+	}
+
+	public void setPosY(int posY) {
+		this.posY = posY;
 	}
 
 	private Color randomColour() {
